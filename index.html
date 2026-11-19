@@ -33,10 +33,31 @@
     <h1>BF Gym</h1>
     <p id="estado">Cargando…</p>
   </main>
-  <!-- La app. Esta página no guarda datos de los usuarios: todo se maneja dentro de la app. -->
-  <iframe id="app" title="BF Gym" src="https://script.google.com/macros/s/AKfycbwMfm_cM2n3nGvGKUwhAAs3Gtfj5eMZgDmwwqrak_A8uVsHXWTETlvTLE722SVptZb9/exec"></iframe>
+  <!-- La app (Google Apps Script). Esta página no envía ni guarda datos en ningún servidor: solo muestra la app. -->
+  <iframe id="app" title="BF Gym"></iframe>
   <script>
+    var APP_URL = 'https://script.google.com/macros/s/AKfycbwMfm_cM2n3nGvGKUwhAAs3Gtfj5eMZgDmwwqrak_A8uVsHXWTETlvTLE722SVptZb9/exec';
     var app = document.getElementById('app');
+
+    // Sesión iniciada: la app (dentro del recuadro) guarda su código de sesión en este teléfono, en el
+    // almacenamiento de esta página, que no cambia aunque se publique una versión nueva de la app.
+    // Solo se acepta hablar con el recuadro de Google Apps Script; el código nunca sale del teléfono.
+    var ORIGEN_APP = /^https:\/\/n-[a-z0-9-]+-script\.googleusercontent\.com$/;
+    window.addEventListener('message', function (e) {
+      if (!ORIGEN_APP.test(e.origin) || !e.data || e.data.bfgym !== 1) return;
+      try {
+        if (e.data.tipo === 'pedir') {
+          e.source.postMessage({ bfgym: 1, tipo: 'sesion', token: localStorage.getItem('bfgym_sesion') || '' }, e.origin);
+        } else if (e.data.tipo === 'guardar') {
+          if (e.data.token) localStorage.setItem('bfgym_sesion', String(e.data.token));
+          else localStorage.removeItem('bfgym_sesion');
+        }
+      } catch (err) {}
+    });
+
+    // Los enlaces de los correos (por ejemplo la autorización del padre, madre o tutor) llegan con
+    // parámetros en la dirección; se los pasa a la app.
+    app.src = APP_URL + location.search;
     app.addEventListener('load', function () {
       setTimeout(function () { app.classList.add('lista'); }, 500);
     });
