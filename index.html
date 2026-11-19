@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0E1116">
   <meta name="robots" content="noindex, nofollow">
   <meta name="description" content="App privada de entrenamiento">
@@ -15,21 +15,36 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preconnect" href="https://script.google.com">
   <style>
-    html, body { margin: 0; height: 100%; background: #0E1116; color: #F5F7FA; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-    main { min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; box-sizing: border-box; text-align: center; }
-    img { width: 96px; height: 96px; }
-    h1 { margin: 0; font-size: 48px; letter-spacing: 0.02em; color: #D4FF3A; }
-    p { margin: 0; font-size: 16px; color: #AEB6C2; }
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #0E1116; color: #F5F7FA; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    main { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; box-sizing: border-box; text-align: center; }
+    main img { width: 96px; height: 96px; }
+    main h1 { margin: 0; font-size: 48px; letter-spacing: 0.02em; color: #D4FF3A; }
+    main p { margin: 0; font-size: 16px; color: #AEB6C2; }
+    iframe { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; background: #0E1116; opacity: 0; transition: opacity .25s ease; }
+    iframe.lista { opacity: 1; }
   </style>
 </head>
 <body>
+  <!-- Pantalla de espera: se ve mientras carga la app (que corre en Google Apps Script). -->
   <main>
     <img src="/icon-192.png" alt="" width="96" height="96">
     <h1>BF Gym</h1>
-    <p>App privada de entrenamiento. En preparación.</p>
+    <p id="estado">Cargando…</p>
   </main>
+  <!-- La app. Esta página no guarda datos de los usuarios: todo se maneja dentro de la app. -->
+  <iframe id="app" title="BF Gym" src="https://script.google.com/macros/s/AKfycbwMfm_cM2n3nGvGKUwhAAs3Gtfj5eMZgDmwwqrak_A8uVsHXWTETlvTLE722SVptZb9/exec"></iframe>
   <script>
+    var app = document.getElementById('app');
+    app.addEventListener('load', function () {
+      setTimeout(function () { app.classList.add('lista'); }, 500);
+    });
+    setTimeout(function () {
+      if (!app.classList.contains('lista')) {
+        document.getElementById('estado').textContent = 'Está tardando más de lo normal. Revisá la conexión a internet.';
+      }
+    }, 15000);
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js');
     }
